@@ -43,23 +43,25 @@ fun similar_names(substitutions, full_name) =
         in
             full_names(first_names, full_name)
         end
+    end
 
 (* ex.2 *)
-fun card_color c =
-    case #1 c of
-        Clubs cd => Black b
-        |Spades s => Black b
-        |Hearts h => Red r
-        |Diamond => Red r
 
-fun card_value c =
-    case #2 c of
+(* get color of a card *)
+fun card_color (c:card) =
+    case (#1 c) of
+        Clubs => Black
+        |Spades => Black
+        |_ => Red
+
+(* get value of a card *)
+fun card_value (c:card) =
+    case (#2 c) of
         Num i => i
         |Ace => 11
-        |Jack => 10
-        |Queen => 10
-        |King => 10
+        |_ => 10
 
+(* remove a card from a card list *)
 fun remove_card(cs, c, e) =
     let fun all_except_option(c, cs) =
             case cs of
@@ -71,7 +73,7 @@ fun remove_card(cs, c, e) =
                                 else NONE
     in
         let
-            result = all_except_option(c, cs)
+            val result = all_except_option(c, cs)
         in
             if isSome(result)
             then valOf result
@@ -79,6 +81,8 @@ fun remove_card(cs, c, e) =
         end
     end
 
+(* if color of all cards is the same *)
+(* nest pattern *)
 fun all_same_color cs =
     case cs of
         [] => true
@@ -86,6 +90,8 @@ fun all_same_color cs =
         |head::(neck::rest) => (card_color(head) = card_color(neck)) andalso all_same_color(rest)
 
 
+(* return sum of cards *)
+(* tail recursion *)
 fun sum_cards cs =
     let fun sum_card_with_init(cs, init) =
             case cs of
@@ -95,4 +101,29 @@ fun sum_cards cs =
         sum_card_with_init(cs, 0)
     end
 
+(* calculate the score of a card list *)
+fun score(cs, goal) =
+    let
+        val sum = sum_cards(cs)
+    in
+        case sum > goal of
+            true => 3 * sum
+            |false => case all_same_color(cs) of
+                            true => sum div 2
+                            |false => sum
+    end
 
+(* run the card game *)
+fun officiate(cs, mv, goal) =
+    let fun game_state(cs, mv, goal, hcs) =
+            case (mv, sum_cards(cs) > goal) of
+                ([], false) => score(cs, goal)
+                |(m::mv', false) case m of
+                    |(Draw,  => case cs of
+                        [] => score(cs, goal)
+                        c::cs' => game_state(cs', mv', goal, c::hcs)
+                    |Discard d => game_state(cs, mv', goal, remove_card(hcs, d, IllegalMove))
+                |(_, true) => sore(cs, goal)
+    in
+        game_state(cs, mv, goal, [])
+    end
