@@ -1,6 +1,14 @@
 (* homework 2 *)
 
 (* ex.1 *)
+
+(* if you use this function to compare two strings (returns true if the same
+   string), then you avoid several of the functions in problem 1 having
+   polymorphic types that may be confusing *)
+fun same_string(s1 : string, s2 : string) =
+    s1 = s2
+(* put your solutions for problem 1 here *)
+
 (* Remove string from string list. *)
 fun all_except_option(str, str_list) =
     case str_list of
@@ -46,6 +54,19 @@ fun similar_names(substitutions, full_name) =
     end
 
 (* ex.2 *)
+
+(* you may assume that Num is always used with values 2, 3, ..., 10
+   though it will not really come up *)
+datatype suit = Clubs | Diamonds | Hearts | Spades
+datatype rank = Jack | Queen | King | Ace | Num of int
+type card = suit * rank
+
+datatype color = Red | Black
+datatype move = Discard of card | Draw
+
+exception IllegalMove
+
+(* put your solutions for problem 2 here *)
 
 (* get color of a card *)
 fun card_color (c:card) =
@@ -117,13 +138,29 @@ fun score(cs, goal) =
 fun officiate(cs, mv, goal) =
     let fun game_state(cs, mv, goal, hcs) =
             case (mv, sum_cards(cs) > goal) of
-                ([], false) => score(cs, goal)
-                |(m::mv', false) case m of
-                    |(Draw,  => case cs of
+                (_, true) => score(cs, goal)
+                |([], false) => score(cs, goal)
+                |(m::mv', false) => case m of
+                    Discard d => game_state(cs, mv', goal, remove_card(hcs, d, IllegalMove))
+                    |Draw => case cs of
                         [] => score(cs, goal)
-                        c::cs' => game_state(cs', mv', goal, c::hcs)
-                    |Discard d => game_state(cs, mv', goal, remove_card(hcs, d, IllegalMove))
-                |(_, true) => sore(cs, goal)
+                        |c::cs' => game_state(cs', mv', goal, c::hcs)
     in
         game_state(cs, mv, goal, [])
+    end
+
+(* tests *)
+fun provided_test1 () = (* correct behavior: raise IllegalMove *)
+    let val cards = [(Clubs,Jack),(Spades,Num(8))]
+    val moves = [Draw,Discard(Hearts,Jack)]
+    in
+    officiate(cards,moves,42)
+    end
+
+(* not understand why the result is 3, should be 132 *)
+fun provided_test2 () = (* correct behavior: return 3 *)
+    let val cards = [(Clubs,Ace),(Spades,Ace),(Clubs,Ace),(Spades,Ace)]
+    val moves = [Draw,Draw,Draw,Draw,Draw]
+    in
+    officiate(cards,moves,42)
     end
