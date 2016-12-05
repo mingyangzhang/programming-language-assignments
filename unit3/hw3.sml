@@ -42,7 +42,7 @@ fun string_compare1 (x, y) =
 
 (* Return the the string closest to the beginning of the list in case of ties*)
 fun longest_string1 xs =
-    List.foldl string_compare "" xs
+    List.foldl string_compare1 "" xs
 
 (* Return the longer or equivalent string*)
 fun string_compare2 (x, y) =
@@ -55,20 +55,21 @@ fun longest_string2 xs =
 
 (* type (int * int -> bool) -> string list -> string *)
 fun longest_string_helper comp xs =
-    let val str = ""
+    let fun lsh_with_init comp xs init =
+	    case xs of
+	       [] => init
+	       |x::xs' => if comp(String.size x, String.size init)
+			  then lsh_with_init comp xs' x
+			  else lsh_with_init comp xs' init
     in
-        case xs of
-            [] => str
-            |x::xs' => if comp(String.size x, String.size str)
-                       then x
-                       else longest_string_helper comp xs'
-    end
+	lsh_with_init comp xs ""
+    end 	
 
 (* longest_string1 *)
-val longest_string3 = longest_string_helper (fn x y => x>y);
+val longest_string3 = longest_string_helper (fn (x, y) => x>y);
 
 (* longest_string2 *)
-val longest_string4 = longest_string_helper (fn x y => x>=y);
+val longest_string4 = longest_string_helper (fn (x, y) => x>=y);
 
 (* funcs combining *)
 val longest_capitalized = longest_string1 o only_capitals;
