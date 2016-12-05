@@ -1,4 +1,5 @@
-(* homework 2 *)
+(* Programming Language homework 3 *)
+(* author: Mingyang Zhang *)
 
 (* ex.1 *)
 
