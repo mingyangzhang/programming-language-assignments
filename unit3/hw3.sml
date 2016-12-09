@@ -79,12 +79,30 @@ fun g f1 f2 p =
       | _                 => 0
     end
 
-val count_wildcards = g (fn => 1) (fn x => 0)
+val count_wildcards = g (fn() => 1) (fn x => 0)
 
-val count_wild_and_variable_lengths = g (fn => 1) (String.size)
+val count_wild_and_variable_lengths = g (fn() => 1) (String.size)
 
 fun count_some_var (p, str) =
-    g (fn => 1) (fn x => if x=str then 1 else 0) p
+    g (fn() => 1) (fn x => if x=str then 1 else 0) p
+
+(* take a pattern and return a list of variable it contains *)
+fun check_pat_helper1 p =
+    case p of
+        Variable x => [x]
+        |TupleP ps => List.foldl (fn (p, lst) => (check_pat_helper1 p)@lst) [] ps
+        |ConstructorP(_,p) =>  check_pat_helper1 p
+        |_ => []
+
+(* take a list and return if there are same elements *)
+fun check_pat_helper2 lst =
+  case lst of
+    [] => false
+    |head::[] => false
+    |head::(neck::body) => head=neck andalso List.exists (fn x => x=neck) body
+
+val check_pat = check_pat_helper2 o check_pat_helper1
+
 
 
 
