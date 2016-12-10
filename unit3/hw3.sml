@@ -103,7 +103,21 @@ fun check_pat_helper2 lst =
 
 val check_pat = check_pat_helper2 o check_pat_helper1
 
+(* take a valu*pattern pair and return match list option *)
+fun match(v, p) =
+    case (v, p) of
+        (_, Wildcard) => SOME([])
+        |(_, Variable s) => SOME([(s,v)])
+        |(Unit, UnitP) => SOME([])
+        |(Const, ConstP) => SOME([])
+        |(Tuple vs, TupleP ps) => if (List.length vs) = (List.length vs)
+                                  then all_answers match Listpair.zip(vs, ps)
+                                  else NONE
+        |(Constructor(s2,v), ConstructorP(s1,p)) => if s1 = s2
+                                                    then match(v, p)
+                                                    else NONE
+        |_ => NONE
 
-
-
-
+fun first_match(v, ps) =
+    first_answer match ps v
+    handle NoAnswer => NONE
