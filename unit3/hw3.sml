@@ -109,9 +109,9 @@ fun match(v, p) =
         (_, Wildcard) => SOME([])
         |(_, Variable s) => SOME([(s,v)])
         |(Unit, UnitP) => SOME([])
-        |(Const, ConstP) => SOME([])
+        |(Const i, ConstP p) => SOME([])
         |(Tuple vs, TupleP ps) => if (List.length vs) = (List.length vs)
-                                  then all_answers match Listpair.zip(vs, ps)
+                                  then all_answers match (ListPair.zip(vs, ps))
                                   else NONE
         |(Constructor(s2,v), ConstructorP(s1,p)) => if s1 = s2
                                                     then match(v, p)
@@ -119,5 +119,5 @@ fun match(v, p) =
         |_ => NONE
 
 fun first_match(v, ps) =
-    first_answer match ps v
+    SOME(first_answer (fn p => match(v,p)) ps)
     handle NoAnswer => NONE
